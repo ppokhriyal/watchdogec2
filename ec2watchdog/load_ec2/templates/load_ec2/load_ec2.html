@@ -17,8 +17,8 @@
             </div>
         </div>
     {% else %}
-        <button type="button" class="btn btn-secondary btn-sm float-end mb-3 text-warning" onclick="sync()" id="sync">Sync Instances</button>
-        <button type="button" class="btn btn-secondary btn-sm float-end mb-3 text-warning" onclick="sync()" id="loadsync">
+        <button type="button" class="btn btn-secondary btn-sm float-end mb-3 " onclick="sync()" id="sync">Sync Instances</button>
+        <button type="button" class="btn btn-secondary btn-sm float-end mb-3 " onclick="sync()" id="loadsync">
             <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
             Syncing Instances
         </button>
@@ -80,7 +80,7 @@
                             </div>     
                             {% else %}
                             <div class="btn-group btn-group-sm ms-2" role="group" aria-label="Button group with nested dropdown">
-                                <button type="button" class="btn btn-primary">View Info</button>
+                                <a class="btn btn-primary" href="{{url_for('load_ec2.viewinfo',idinstance=i['Instances'][0]['InstanceId']+':'+awsregion+':'+row)}}" role="button">View Info</a>
                                 <div class="btn-group btn-group-sm" role="group">
                                     <button id="btnGroupDrop1" type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
                                         Instance State

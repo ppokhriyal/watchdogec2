@@ -12,7 +12,7 @@ def home():
     page = request.args.get('page',1,type=int)
     accesskeydb_len = len(db.session.query(AccessKey).all())
     accesskey_records = AccessKey.query.paginate(page=page,per_page=10)
-    return render_template('home/home.html',title='EC2 Watchdog : sHome',accesskeydb_len=accesskeydb_len,accesskey_records=accesskey_records)
+    return render_template('home/home.html',title='EC2 Watchdog : Home',accesskeydb_len=accesskeydb_len,accesskey_records=accesskey_records)
 
 #Remove Aws AccessKey from Database
 @blue.route('/remove/<string:rowid>',methods=('GET','POST'))

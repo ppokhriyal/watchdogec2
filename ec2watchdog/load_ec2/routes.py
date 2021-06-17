@@ -147,3 +147,23 @@ def terminatec2(idinstance):
     else:
         ec2_terminate_response = client.terminate_instances(InstanceIds=[instance_id])
         return jsonify({'result':'pass'})
+
+# View EC2 info
+@blue.route('/viewinfo/<string:idinstance>',methods=['GET','POST'])
+def viewinfo(idinstance):
+    awsregion = idinstance.split(":")[1]
+    row = idinstance.split(":")[2]
+    instance_id = idinstance.split(":")[0]
+
+    #get access info
+    get_access_info = AccessKey.query.get(row)
+
+    #get accesskey and secretkey
+    accesskey = get_access_info.accesskeyid
+    secretkey = get_access_info.secretkeyid
+
+    client = boto3.client('ec2',region_name=awsregion,aws_access_key_id=accesskey,aws_secret_access_key=secretkey)
+    response = client.describe_instances(InstanceIds=[instance_id])
+    instance_data = response['Reservations']
+    print(instance_data)
+    return render_template('load_ec2/viewinfo.html',title="EC2 View Info",awsregion=awsregion,row=row,instance_id=instance_id,instance_data=instance_data)
