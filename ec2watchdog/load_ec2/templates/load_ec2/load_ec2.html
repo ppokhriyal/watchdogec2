@@ -1,0 +1,203 @@
+{% extends 'home/layout.html' %}
+{% block content %}
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{url_for('home.home')}}">Home</a></li>
+            <li class="breadcrumb-item"><a href="{{url_for('load_ec2.ec2',rowid=row)}}">EC2</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Loading EC2 instances from {{awsregion}}</li>  
+        </ol>
+    </nav>
+    {% if instance_load_length == 0 %}
+        <div class="alert alert-danger d-flex align-items-center" role="alert">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-exclamation-triangle-fill flex-shrink-0 me-2" viewBox="0 0 16 16" role="img" aria-label="Warning:">
+                <path d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/>
+            </svg>
+            <div>
+                EC2 instances not found
+            </div>
+        </div>
+    {% else %}
+        <button type="button" class="btn btn-secondary btn-sm float-end mb-3 text-warning" onclick="sync()" id="sync">Sync Instances</button>
+        <button type="button" class="btn btn-secondary btn-sm float-end mb-3 text-warning" onclick="sync()" id="loadsync">
+            <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+            Syncing Instances
+        </button>
+        <table class="table table-bordered table-hover table-sm text-center" id="tableData">
+            <thead class="table-dark">
+                <tr>
+                  <th scope="col">Instance ID</th>
+                  <th scope="col">Name</th>
+                  <th scope="col">Instance Type</th>
+                  <th scope="col">Public IP</th>
+                  <th scope="col">State</th>
+                  <th scope="col">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for i in instance_data %}
+                    <tr>
+                        <td>{{i['Instances'][0]['InstanceId']}}</td>
+                        {% if "Tags" in i['Instances'][0].keys() %}
+                            <td>{{i['Instances'][0]['Tags'][0]['Value']}}</td>
+                        {% else %}
+                            <td>NA</td>    
+                        {% endif %}
+                        <td>{{i['Instances'][0]['InstanceType']}}</td>
+                        {% if "PublicIpAddress" in i['Instances'][0].keys() %}
+                            <td>{{i['Instances'][0]['PublicIpAddress']}}
+                        {% else %}
+                            <td>NA</td>
+                        {% endif %}
+                        <td id="statuscell">
+                            {% if i['Instances'][0]['State']['Name'] == "running" %}
+                                <i class="fas fa-thumbs-up text-success"></i>
+                                {{i['Instances'][0]['State']['Name']}}
+                            {% elif i['Instances'][0]['State']['Name'] == "stopped" %}
+                                <i class="fas fa-thumbs-down text-danger"></i>
+                                {{i['Instances'][0]['State']['Name']}}
+                            {% elif i['Instances'][0]['State']['Name'] == "terminated" %}
+                                <i class="fas fa-thumbs-down text-danger"></i>
+                                {{i['Instances'][0]['State']['Name']}}
+                            {% else %}
+                                {{i['Instances'][0]['State']['Name']}}
+                            {% endif %}    
+                        </td>
+                        <td>
+                            {% if i['Instances'][0]['State']['Name'] == "terminated" %}
+                            <div class="btn-group btn-group-sm ms-2" role="group" aria-label="Button group with nested dropdown">
+                                <button type="button" class="btn btn-primary" disabled>View Info</button>
+                                <div class="btn-group btn-group-sm" role="group">
+                                    <button id="btnGroupDrop1" type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" disabled>
+                                        Instance State
+                                    </button>
+                                    <ul class="dropdown-menu" aria-labelledby="btnGroupDrop1">
+                                        <li><a class="dropdown-item" href="#" onclick="startec2('{{i['Instances'][0]['InstanceId']}}')">Start</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="stopec2('{{i['Instances'][0]['InstanceId']}}')">Stop</a></li>
+                                        <li><a class="dropdown-item" href="#">Reboot</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="terminatec2('{{i['Instances'][0]['InstanceId']}}')">Terminate</a></li>
+                                    </ul>
+                                </div>
+                            </div>     
+                            {% else %}
+                            <div class="btn-group btn-group-sm ms-2" role="group" aria-label="Button group with nested dropdown">
+                                <button type="button" class="btn btn-primary">View Info</button>
+                                <div class="btn-group btn-group-sm" role="group">
+                                    <button id="btnGroupDrop1" type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                                        Instance State
+                                    </button>
+                                    <ul class="dropdown-menu" aria-labelledby="btnGroupDrop1">
+                                        <li><a class="dropdown-item" href="#" onclick="startec2('{{i['Instances'][0]['InstanceId']}}')">Start</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="stopec2('{{i['Instances'][0]['InstanceId']}}')">Stop</a></li>
+                                       <!-- <li><a class="dropdown-item" href="#" onclick="rebootec2('{{i['Instances'][0]['InstanceId']}}')">Reboot</a></li>-->
+                                        <li><a class="dropdown-item" href="#" onclick="terminatec2('{{i['Instances'][0]['InstanceId']}}')">Terminate</a></li>
+                                    </ul>
+                                </div>
+                            </div>     
+                            {% endif %}
+                            
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+        <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script> 
+        <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/jquery-ui.min.js"></script>
+        <script type="text/javascript" src="{{url_for('static',filename='js/paging.js')}}"></script>
+        <script type="text/javascript">
+            $(document).ready(function() {
+                $('#tableData').paging({limit:5});
+            });
+        </script>
+        <script>
+            document.getElementById("loadsync").style.display = "none";
+            function sync(){
+                document.getElementById("sync").style.display = "none";
+                document.getElementById("loadsync").style.display = "block";
+                location.reload();
+            }
+        </script>
+       
+        <script>
+            function startec2(x){
+                var instanceid = x;
+                var current_url = window.location.href;
+                var iid = current_url.split("/")[4].split("#")[0];
+                var idinstance = instanceid+"_"+iid
+
+                req = $.ajax({
+                    url : '/startec2/'+idinstance,
+                    type : 'POST'
+                });
+                req.done(function(data){
+                    if (data.result == "fail"){
+                        alert("\t\tError : Starting EC2 Instance  "+instanceid);
+                    }else{
+                        location.reload();
+                    }
+                });
+            }
+        </script>
+        <script>
+            function stopec2(x){
+                var instanceid = x;
+                var current_url = window.location.href;
+                var iid = current_url.split("/")[4].split("#")[0];
+                var idinstance = instanceid+"_"+iid
+
+                req = $.ajax({
+                    url : '/stopec2/'+idinstance,
+                    type : 'POST'
+                });
+                req.done(function(data){
+                    if (data.result == "fail"){
+                        alert("Error Code 80 : Stopping EC2 Instance  "+instanceid);
+                    } else {
+                        location.reload();
+                    }
+                });
+            }
+        </script>
+        <!-- <script>
+            function rebootec2(x){
+                var instanceid = x;
+                var current_url = window.location.href;
+                var iid = current_url.split("/")[4].split("#")[0];
+                var idinstance = instanceid+"_"+iid
+
+                req = $.ajax({
+                    url : '/rebootec2/'+idinstance,
+                    type : 'POST'
+                });
+                req.done(function(data){
+                    if (data.result == "fail"){
+                        alert("Error Code 80 : Rebooting EC2 Instance  "+instanceid);
+                    } else {
+                        location.reload();
+                    }
+                });
+            }
+        </script> -->
+        <script>
+            function terminatec2(x){
+
+                var instanceid = x;
+                var current_url = window.location.href;
+                var iid = current_url.split("/")[4].split("#")[0];
+                var idinstance = instanceid+"_"+iid
+
+                req = $.ajax({
+                    url : '/terminatec2/'+idinstance,
+                    type : 'POST'
+                });
+                req.done(function(data){
+                    if (data.result == "fail"){
+                        alert("Error Code 48 : Terminating EC2 Instance  "+instanceid);
+                    } else {
+                        location.reload();
+                    }
+                });
+            }
+        </script>
+    {% endif %}
+{% endblock content %}
