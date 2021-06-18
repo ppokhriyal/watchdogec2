@@ -166,4 +166,7 @@ def viewinfo(idinstance):
     response = client.describe_instances(InstanceIds=[instance_id])
     instance_data = response['Reservations']
     print(instance_data)
-    return render_template('load_ec2/viewinfo.html',title="EC2 View Info",awsregion=awsregion,row=row,instance_id=instance_id,instance_data=instance_data)
+    ami_info = client.describe_images(Filters=[{'Name':'image-id','Values':[instance_data[0]['Instances'][0]['ImageId']]}])
+    print(ami_info)
+        
+    return render_template('load_ec2/viewinfo.html',title="EC2 View Info",awsregion=awsregion,row=row,instance_id=instance_id,instance_data=instance_data,ami_info=ami_info)

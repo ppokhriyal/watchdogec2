@@ -10,6 +10,11 @@
     <div class="pt-4">
         <p class="h5" style="color: purple;">Instance: {{instance_id}} ({{instance_data[0]['Instances'][0]['Tags'][0]['Value']}})</p>
     </div>
+    <button type="button" class="btn btn-secondary btn-sm float-end mb-3 " onclick="sync()" id="sync">Sync Instance info</button>
+    <button type="button" class="btn btn-secondary btn-sm float-end mb-3 " onclick="sync()" id="loadsync">
+        <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+            Syncing Instance infos
+    </button>
     <nav class="mt-4">
         <div class="nav nav-tabs" id="nav-tab" role="tablist">
           <button class="nav-link active" id="nav-details-tab" data-bs-toggle="tab" data-bs-target="#nav-details" type="button" role="tab" aria-controls="nav-home" aria-selected="true">Details</button>
@@ -20,11 +25,11 @@
     <div class="tab-content" id="nav-tabContent">
         <!-- Details Tab -->
         <div class="tab-pane fade show active" id="nav-details" role="tabpanel" aria-labelledby="nav-details-tab">
-            <div class="row">
+            <div class="row mt-2">
                 <div class="col">
-                    <div class="mt-3">
+                    <div class="mt-2">
                         <p class="text-muted">Instance ID</p>
-                        <p class="text-dark">{{instance_id}} ({{instance_data[0]['Instances'][0]['Tags'][0]['Value']}})</p>
+                        <p class="text-dark">{{instance_id}}</p>
                     </div>
                     <div>
                         <p class="text-muted">Instance state</p>
@@ -43,9 +48,17 @@
                         <p class="text-muted">Instance type</p>
                         <p>{{instance_data[0]['Instances'][0]['InstanceType']}}</p>
                     </div>
+                    <div>
+                        <p class="text-muted">Platform</p>
+                        <p>{{ami_info['Images'][0]['PlatformDetails']}}</p>
+                    </div>
+                    <div>
+                        <p class="text-muted">Architecture</p>
+                        <p>{{ami_info['Images'][0]['Architecture']}}</p>
+                    </div>
                 </div>
                 <div class="col border-start">
-                    <div class="mt-3">
+                    <div class="mt-2">
                         <p class="text-muted">Public IPv4 address</p>
                         <p id="publicip">
                             <a href="#" class="text-decoration-none" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Copy Public IPv4">
@@ -67,9 +80,17 @@
                             {{instance_data[0]['Instances'][0]['PublicDnsName']}}
                         </p>
                     </div>
+                    <div>
+                        <p class="text-muted">AMI ID</p>
+                        <p>{{instance_data[0]['Instances'][0]['ImageId']}}</p>
+                    </div>
+                    <div>
+                        <p class="text-muted">AMI Location</p>
+                        <p>{{ami_info['Images'][0]['ImageLocation']}}</p>
+                    </div>
                 </div>
                 <div class="col border-start">
-                    <div class="mt-3">
+                    <div class="mt-2">
                         <p class="text-muted">Private IPv4 address</p>
                         <p>{{instance_data[0]['Instances'][0]['PrivateIpAddress']}}</p>
                     </div>
@@ -91,6 +112,14 @@
         <div class="tab-pane fade" id="nav-profile" role="tabpanel" aria-labelledby="nav-profile-tab">...</div>
         <div class="tab-pane fade" id="nav-contact" role="tabpanel" aria-labelledby="nav-contact-tab">...</div>
     </div>
+    <script>
+        document.getElementById("loadsync").style.display = "none";
+        function sync(){
+            document.getElementById("sync").style.display = "none";
+            document.getElementById("loadsync").style.display = "block";
+            location.reload();
+        }
+    </script>
     <script>
         function copypublicdns(){
             document.getElementById("publicdns").style.color = "green";
