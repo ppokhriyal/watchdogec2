@@ -6,6 +6,8 @@ from ec2watchdog.load_ec2.forms import Ec2FilterForm
 import datetime
 import boto3
 import botocore
+import datetime
+from dateutil.tz import tzutc
 
 #Blueprint object
 blue = Blueprint('load_ec2',__name__,template_folder='templates')
@@ -28,8 +30,7 @@ def loadec2(rowinfo):
     instance_load = client.describe_instances()
     instance_load_length = len(instance_load['Reservations'])
     instance_data = instance_load['Reservations']
-    #for i in instance_data:
-    #    print(i['Instances'])
+   
     return render_template('load_ec2/load_ec2.html',title="Load EC2",instance_data=instance_data,instance_load_length=instance_load_length,row=rowid,awsregion=region)
 
 #Filter EC2
@@ -165,8 +166,15 @@ def viewinfo(idinstance):
     client = boto3.client('ec2',region_name=awsregion,aws_access_key_id=accesskey,aws_secret_access_key=secretkey)
     response = client.describe_instances(InstanceIds=[instance_id])
     instance_data = response['Reservations']
-    print(instance_data)
+    
+    #ami
     ami_info = client.describe_images(Filters=[{'Name':'image-id','Values':[instance_data[0]['Instances'][0]['ImageId']]}])
-    print(ami_info)
-        
-    return render_template('load_ec2/viewinfo.html',title="EC2 View Info",awsregion=awsregion,row=row,instance_id=instance_id,instance_data=instance_data,ami_info=ami_info)
+    #security groups
+    sg = client.describe_security_groups(Filters=[{'Name':'group-id','Values':['sg-092eb881f06a373b6']}])
+    sg_data = sg['SecurityGroups'][0]
+    #volume
+    volume = client.describe_volumes(Filters=[{'Name':'attachment.instance-id','Values':[instance_id]}])
+    volume_data = volume['Volumes']
+   
+    return render_template('load_ec2/viewinfo.html',title="EC2 View Info",awsregion=awsregion,row=row,instance_id=instance_id,instance_data=instance_data,ami_info=ami_info,
+    sg_data=sg_data,volume_data=volume_data)
