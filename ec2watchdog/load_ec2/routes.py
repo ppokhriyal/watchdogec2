@@ -182,3 +182,24 @@ def viewinfo(idinstance):
    
     return render_template('load_ec2/viewinfo.html',title="EC2 View Info",awsregion=awsregion,row=row,instance_id=instance_id,instance_data=instance_data,ami_info=ami_info,
     sg_data=sg_data,volume_data=volume_data)
+
+#SSH EC2 instance
+@blue.route('/sshec2/<string:idinstance>',methods=['GET','POST'])
+def sshec2(idinstance):
+    awsregion = idinstance.split(":")[1]
+    row = idinstance.split(":")[2]
+    instance_id = idinstance.split(":")[0]
+
+    #get access info
+    get_access_info = AccessKey.query.get(row)
+
+    #get accesskey and secretkey
+    accesskey = get_access_info.accesskeyid
+    secretkey = get_access_info.secretkeyid
+
+    #web ssh
+    #http://localhost:8889/?hostname=xx&username=yy&password=str_base64_encoded
+    #http://localhost:8889/#bgcolor=green
+    #http://localhost:8889/?title=my-ssh-server
+    #http://localhost:8889/?command=pwd
+    return render_template('load_ec2/sshec2.html',title='SSH EC2',awsregion=awsregion,row=row,instance_id=instance_id)

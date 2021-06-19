@@ -17,6 +17,9 @@
             </div>
         </div>
     {% else %}
+        <div class="pt-4">
+            <p class="h5" style="color: purple;">Dashboard</p>
+        </div>
         <button type="button" class="btn btn-secondary btn-sm float-end mb-3 " onclick="sync()" id="sync">Sync Instances</button>
         <button type="button" class="btn btn-secondary btn-sm float-end mb-3 " onclick="sync()" id="loadsync">
             <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
@@ -80,7 +83,7 @@
                             </div>     
                             {% else %}
                             <div class="btn-group btn-group-sm ms-2" role="group" aria-label="Button group with nested dropdown">
-                                <a class="btn btn-primary" href="{{url_for('load_ec2.viewinfo',idinstance=i['Instances'][0]['InstanceId']+':'+awsregion+':'+row)}}" role="button">View Info</a>
+                                <a class="btn btn-primary" href="{{url_for('load_ec2.viewinfo',idinstance=i['Instances'][0]['InstanceId']+':'+awsregion+':'+row)}}" role="button" data-bs-toggle="tooltip" data-bs-placement="right" title="View summary EC2 instance">View Info</a>
                                 <div class="btn-group btn-group-sm" role="group">
                                     <button id="btnGroupDrop1" type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
                                         Instance State
@@ -92,7 +95,7 @@
                                        <li><a class="dropdown-item" href="#" onclick="terminatec2('{{i['Instances'][0]['InstanceId']}}')">Terminate</a></li>
                                     </ul>
                                 </div>
-                                <a class="btn btn-primary" href="{{url_for('load_ec2.viewinfo',idinstance=i['Instances'][0]['InstanceId']+':'+awsregion+':'+row)}}" role="button" data-bs-toggle="tooltip" data-bs-placement="right" title="Remote command execution">Remote CMD</a>
+                                <a class="btn btn-primary" href="{{url_for('load_ec2.sshec2',idinstance=i['Instances'][0]['InstanceId']+':'+awsregion+':'+row)}}" role="button" data-bs-toggle="tooltip" data-bs-placement="right" title="SSH EC2 instance">Cloud Shell</a>
                             </div>     
                             {% endif %}
                             
