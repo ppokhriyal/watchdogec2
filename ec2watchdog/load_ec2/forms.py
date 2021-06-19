@@ -1,8 +1,17 @@
 from flask_wtf import FlaskForm
-from wtforms import SelectField, SubmitField
+from wtforms import SelectField, SubmitField, PasswordField
+from wtforms.fields.core import StringField,SelectField
+from wtforms.validators import DataRequired,ValidationError,IPAddress
 
+#EC2 SSH form
+class Ec2SshForm(FlaskForm):
+	hostname = StringField('hostname',validators=[DataRequired(),IPAddress(ipv4=True,message="Please enter valid public ipv4 address")])
+	username = StringField('username',validators=[DataRequired()])
+	password = PasswordField('password',validators=[DataRequired()])
+	title = StringField('title',validators=[DataRequired()])
+	submit = SubmitField('Connect')
 
-#EC2 Filter form
+#EC2 Region
 class Ec2FilterForm(FlaskForm):
     awsregion = SelectField('Region',choices=[('us-east-1','US East (N. Varginia)'),('us-east-2','US East (Ohio)'),
 		('us-west-1','US West (N. California)'),('us-west-2','US West (Oregon)'),('af-south-1','Africa (CapeTown)'),

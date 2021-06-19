@@ -13,13 +13,34 @@
     <div class="row mt-5">
         <div class="col">
             <form action="" method="post">
+                {{form.hidden_tag()}}
                 <div class="mb-3">
-                    <label for="formGroupExampleInput" class="form-label">Example label</label>
-                    <input type="text" class="form-control" id="formGroupExampleInput" placeholder="Example input placeholder">
-                  </div>
-                  <div class="mb-3">
-                    <label for="formGroupExampleInput2" class="form-label">Another label</label>
-                    <input type="text" class="form-control" id="formGroupExampleInput2" placeholder="Another input placeholder">
+                  <label for="formGroupExampleInput" class="form-label">Public IPv4 address</label>
+                  {% if form.hostname.errors %}
+                    {{form.hostname(class="form-control w-75 is-invalid")}}
+                    <div class="invalid-feedback">
+                      {% for error in form.hostname.errors %}
+                        <span>{{error}}</span>
+                      {% endfor %}
+                    </div>
+                  {% else %}
+                    {{form.hostname(class="form-control w-75",id="ipublic")}}
+                  {% endif %}  
+                </div>
+                <div class="mb-3">
+                  <label for="formGroupExampleInput2" class="form-label">Username</label>
+                  {{form.username(class="form-control w-75")}}
+                </div>
+                <div class="mb-3">
+                  <label for="formGroupExampleInput2" class="form-label">Password</label>
+                  {{form.password(class="form-control w-75")}}
+                </div>
+                <div class="mb-3">
+                  <label for="formGroupExampleInput2" class="form-label">SSH Title</label>
+                  {{form.title(class="form-control w-75",id="title")}}
+                </div>
+                <div class="mb3">
+                  {{form.submit(class="btn btn-success btn-sm")}}
                 </div>
             </form>
         </div>
@@ -84,4 +105,9 @@
             </div>
         </div>
     </div>
+    <script>
+      document.getElementById("ipublic").value = "{{publicip}}";
+      document.getElementById("title").value = "{{instance_id}}";
+
+    </script>
 {% endblock content %}

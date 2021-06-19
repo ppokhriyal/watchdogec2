@@ -2,12 +2,14 @@ from os import access
 from flask import Blueprint,render_template,url_for, flash, redirect, request,jsonify
 from ec2watchdog import app,db
 from ec2watchdog.models import AccessKey
-from ec2watchdog.load_ec2.forms import Ec2FilterForm
+from ec2watchdog.load_ec2.forms import Ec2SshForm,Ec2FilterForm
 import datetime
 import boto3
 import botocore
 import datetime
 from dateutil.tz import tzutc
+import base64
+import webbrowser
 
 #Blueprint object
 blue = Blueprint('load_ec2',__name__,template_folder='templates')
@@ -186,6 +188,7 @@ def viewinfo(idinstance):
 #SSH EC2 instance
 @blue.route('/sshec2/<string:idinstance>',methods=['GET','POST'])
 def sshec2(idinstance):
+    form = Ec2SshForm()
     awsregion = idinstance.split(":")[1]
     row = idinstance.split(":")[2]
     instance_id = idinstance.split(":")[0]
@@ -197,9 +200,21 @@ def sshec2(idinstance):
     accesskey = get_access_info.accesskeyid
     secretkey = get_access_info.secretkeyid
 
-    #web ssh
+    client = boto3.client('ec2',region_name=awsregion,aws_access_key_id=accesskey,aws_secret_access_key=secretkey)
+    response = client.describe_instances(InstanceIds=[instance_id])
+    instance_data = response['Reservations']
+    publicip = instance_data[0]['Instances'][0]['PublicIpAddress']
+    print(instance_data)
+
+    if form.validate_on_submit():
+        password_bytes = form.password.data.encode("ascii")
+        base64_bytes = base64.b64encode(password_bytes)
+        base64_password = base64_bytes.decode("ascii")
+        #web ssh
+        ssh_url = "http://localhost:8889/?hostname="+form.hostname.data+"&username="+form.username.data+"&password="+base64_password+"&title="+form.title.data
+        webbrowser.open_new_tab(ssh_url)
     #http://localhost:8889/?hostname=xx&username=yy&password=str_base64_encoded
     #http://localhost:8889/#bgcolor=green
     #http://localhost:8889/?title=my-ssh-server
     #http://localhost:8889/?command=pwd
-    return render_template('load_ec2/sshec2.html',title='SSH EC2',awsregion=awsregion,row=row,instance_id=instance_id)
+    return render_template('load_ec2/sshec2.html',title='SSH EC2',awsregion=awsregion,row=row,instance_id=instance_id,form=form,publicip=publicip)
