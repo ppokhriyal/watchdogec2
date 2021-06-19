@@ -30,7 +30,7 @@ def loadec2(rowinfo):
     instance_load = client.describe_instances()
     instance_load_length = len(instance_load['Reservations'])
     instance_data = instance_load['Reservations']
-   
+
     return render_template('load_ec2/load_ec2.html',title="Load EC2",instance_data=instance_data,instance_load_length=instance_load_length,row=rowid,awsregion=region)
 
 #Filter EC2
@@ -169,9 +169,13 @@ def viewinfo(idinstance):
     
     #ami
     ami_info = client.describe_images(Filters=[{'Name':'image-id','Values':[instance_data[0]['Instances'][0]['ImageId']]}])
+
     #security groups
-    sg = client.describe_security_groups(Filters=[{'Name':'group-id','Values':['sg-092eb881f06a373b6']}])
+    sg_id = instance_data[0]['Instances'][0]['SecurityGroups'][0]['GroupId']
+ 
+    sg = client.describe_security_groups(Filters=[{'Name':'group-id','Values':[sg_id]}])
     sg_data = sg['SecurityGroups'][0]
+    
     #volume
     volume = client.describe_volumes(Filters=[{'Name':'attachment.instance-id','Values':[instance_id]}])
     volume_data = volume['Volumes']
