@@ -6,10 +6,12 @@ from ec2watchdog.load_ec2.forms import Ec2SshForm,Ec2FilterForm
 import datetime
 import boto3
 import botocore
+from boto3 import resources
 import datetime
 from dateutil.tz import tzutc
 import base64
 import webbrowser
+import time
 
 #Blueprint object
 blue = Blueprint('load_ec2',__name__,template_folder='templates')
@@ -67,6 +69,15 @@ def startec2(idinstance):
         return jsonify({'result':'fail'})
     else:
         ec2_start_response = client.start_instances(InstanceIds=[instance_id])
+        wait_loop = 40
+        status_check = 'running'
+        while wait_loop > 0:
+            response = client.describe_instances(InstanceIds=[instance_id])
+            if response['Reservations'][0]['Instances'][0]['State']['Name'] == status_check:
+                break
+            else:
+                wait_loop = wait_loop - 1
+            time.sleep(5)
         return jsonify({'result':'pass'})
 
 #Stop ec2 instance
@@ -86,6 +97,7 @@ def stopec2(idinstance):
 
     # check the status of instance
     client = boto3.client('ec2',region_name=region,aws_access_key_id=accesskey,aws_secret_access_key=secretkey)
+    ec2_client_resource = boto3.resource('ec2',region_name=region,aws_access_key_id=accesskey,aws_secret_access_key=secretkey)
     response = client.describe_instances(InstanceIds=[instance_id])
     status = ['pending','terminated','stopping','stopped','shutting-down']
    
@@ -93,6 +105,15 @@ def stopec2(idinstance):
         return jsonify({'result':'fail'})
     else:
         ec2_stop_response = client.stop_instances(InstanceIds=[instance_id])
+        wait_loop = 40
+        status_check = 'stopped'
+        while wait_loop > 0:
+            response = client.describe_instances(InstanceIds=[instance_id])
+            if response['Reservations'][0]['Instances'][0]['State']['Name'] == status_check:
+                break
+            else:
+                wait_loop = wait_loop - 1
+            time.sleep(5)
         return jsonify({'result':'pass'})
 
 # Reboot ec2 instance
@@ -149,6 +170,15 @@ def terminatec2(idinstance):
         return jsonify({'result':'fail'})
     else:
         ec2_terminate_response = client.terminate_instances(InstanceIds=[instance_id])
+        wait_loop = 40
+        status_check = 'terminated'
+        while wait_loop > 0:
+            response = client.describe_instances(InstanceIds=[instance_id])
+            if response['Reservations'][0]['Instances'][0]['State']['Name'] == status_check:
+                break
+            else:
+                wait_loop = wait_loop - 1
+            time.sleep(5)
         return jsonify({'result':'pass'})
 
 # View EC2 info
@@ -204,7 +234,6 @@ def sshec2(idinstance):
     response = client.describe_instances(InstanceIds=[instance_id])
     instance_data = response['Reservations']
     publicip = instance_data[0]['Instances'][0]['PublicIpAddress']
-    print(instance_data)
 
     if form.validate_on_submit():
         password_bytes = form.password.data.encode("ascii")
@@ -213,8 +242,4 @@ def sshec2(idinstance):
         #web ssh
         ssh_url = "http://localhost:8889/?hostname="+form.hostname.data+"&username="+form.username.data+"&password="+base64_password+"&title="+form.title.data
         webbrowser.open_new_tab(ssh_url)
-    #http://localhost:8889/?hostname=xx&username=yy&password=str_base64_encoded
-    #http://localhost:8889/#bgcolor=green
-    #http://localhost:8889/?title=my-ssh-server
-    #http://localhost:8889/?command=pwd
     return render_template('load_ec2/sshec2.html',title='SSH EC2',awsregion=awsregion,row=row,instance_id=instance_id,form=form,publicip=publicip)

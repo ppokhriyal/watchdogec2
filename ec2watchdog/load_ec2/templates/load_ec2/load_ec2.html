@@ -51,19 +51,24 @@
                         {% else %}
                             <td>NA</td>
                         {% endif %}
-                        <td id="statuscell">
-                            {% if i['Instances'][0]['State']['Name'] == "running" %}
-                                <i class="fas fa-thumbs-up text-success"></i>
-                                {{i['Instances'][0]['State']['Name']}}
-                            {% elif i['Instances'][0]['State']['Name'] == "stopped" %}
-                                <i class="fas fa-thumbs-down text-danger"></i>
-                                {{i['Instances'][0]['State']['Name']}}
-                            {% elif i['Instances'][0]['State']['Name'] == "terminated" %}
-                                <i class="fas fa-thumbs-down text-danger"></i>
-                                {{i['Instances'][0]['State']['Name']}}
-                            {% else %}
-                                {{i['Instances'][0]['State']['Name']}}
-                            {% endif %}    
+                        <td>
+                            <p id="spinner">
+                                <span class="spinner-border spinner-grow spinner-grow-sm text-warning text-center spinner-border-sm" role="status" aria-hidden="true" ></span>
+                            </p>    
+                            <p class="text-center" id="statuscell">
+                                {% if i['Instances'][0]['State']['Name'] == "running" %}
+                                    <i class="fas fa-thumbs-up text-success"></i>
+                                    {{i['Instances'][0]['State']['Name']}}
+                                {% elif i['Instances'][0]['State']['Name'] == "stopped" %}
+                                    <i class="fas fa-thumbs-down text-danger"></i>
+                                    {{i['Instances'][0]['State']['Name']}}
+                                {% elif i['Instances'][0]['State']['Name'] == "terminated" %}
+                                    <i class="fas fa-thumbs-down text-danger"></i>
+                                    {{i['Instances'][0]['State']['Name']}}
+                                {% else %}
+                                    {{i['Instances'][0]['State']['Name']}}
+                                {% endif %}
+                            </p>       
                         </td>
                         <td>
                             {% if i['Instances'][0]['State']['Name'] == "terminated" %}
@@ -74,25 +79,25 @@
                                         Instance State
                                     </button>
                                     <ul class="dropdown-menu" aria-labelledby="btnGroupDrop1">
-                                        <li><a class="dropdown-item" href="#" onclick="startec2('{{i['Instances'][0]['InstanceId']}}')">Start</a></li>
+                                        <li><a class="dropdown-item " href="#" onclick="startec2('{{i['Instances'][0]['InstanceId']}}')">Start</a></li>
                                         <li><a class="dropdown-item" href="#" onclick="stopec2('{{i['Instances'][0]['InstanceId']}}')">Stop</a></li>
                                         <li><a class="dropdown-item" href="#">Reboot</a></li>
                                         <li><a class="dropdown-item" href="#" onclick="terminatec2('{{i['Instances'][0]['InstanceId']}}')">Terminate</a></li>
                                     </ul>
                                 </div>
+                                <a class="btn btn-primary disabled" href="{{url_for('load_ec2.sshec2',idinstance=i['Instances'][0]['InstanceId']+':'+awsregion+':'+row)}}" role="button" data-bs-toggle="tooltip" data-bs-placement="right" title="SSH EC2 instance">Cloud Shell</a>
                             </div>     
                             {% else %}
-                            <div class="btn-group btn-group-sm ms-2" role="group" aria-label="Button group with nested dropdown">
+                            <div class="btn-group btn-group-sm ms-2 disabled" role="group" aria-label="Button group with nested dropdown">
                                 <a class="btn btn-primary" href="{{url_for('load_ec2.viewinfo',idinstance=i['Instances'][0]['InstanceId']+':'+awsregion+':'+row)}}" role="button" data-bs-toggle="tooltip" data-bs-placement="right" title="View summary EC2 instance">View Info</a>
                                 <div class="btn-group btn-group-sm" role="group">
                                     <button id="btnGroupDrop1" type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
                                         Instance State
                                     </button>
                                     <ul class="dropdown-menu" aria-labelledby="btnGroupDrop1">
-                                        <li><a class="dropdown-item" href="#" onclick="startec2('{{i['Instances'][0]['InstanceId']}}')">Start</a></li>
-                                        <li><a class="dropdown-item" href="#" onclick="stopec2('{{i['Instances'][0]['InstanceId']}}')">Stop</a></li>
-                                       <!-- <li><a class="dropdown-item" href="#" onclick="rebootec2('{{i['Instances'][0]['InstanceId']}}')">Reboot</a></li>-->
-                                       <li><a class="dropdown-item" href="#" onclick="terminatec2('{{i['Instances'][0]['InstanceId']}}')">Terminate</a></li>
+                                        <li><a id="startlink" class="dropdown-item " href="#" onclick="startec2('{{i['Instances'][0]['InstanceId']}}')">Start</a></li>
+                                        <li><a id="stoplink" class="dropdown-item" href="#" onclick="stopec2('{{i['Instances'][0]['InstanceId']}}')">Stop</a></li>
+                                       <li><a id="terminatelink" class="dropdown-item" href="#" onclick="terminatec2('{{i['Instances'][0]['InstanceId']}}')">Terminate</a></li>
                                     </ul>
                                 </div>
                                 <a class="btn btn-primary" href="{{url_for('load_ec2.sshec2',idinstance=i['Instances'][0]['InstanceId']+':'+awsregion+':'+row)}}" role="button" data-bs-toggle="tooltip" data-bs-placement="right" title="SSH EC2 instance">Cloud Shell</a>
@@ -104,6 +109,9 @@
                 {% endfor %}
             </tbody>
         </table>
+        <script>
+            document.getElementById("spinner").style.display = "none";
+        </script>
         <script>
             document.getElementById("loadsync").style.display = "none";
         </script>
@@ -128,6 +136,12 @@
        
         <script>
             function startec2(x){
+                document.getElementById("statuscell").style.display = "none";
+                document.getElementById("spinner").style.display = "block";
+                document.getElementById("startlink").setAttribute("class","disabled dropdown-item")
+                document.getElementById("stoplink").setAttribute("class","disabled dropdown-item")
+                document.getElementById("terminatelink").setAttribute("class","disabled dropdown-item")
+
                 var instanceid = x;
                 var current_url = window.location.href;
                 var iid = current_url.split("/")[4].split("#")[0];
@@ -148,6 +162,11 @@
         </script>
         <script>
             function stopec2(x){
+                document.getElementById("statuscell").style.display = "none";
+                document.getElementById("spinner").style.display = "block";
+                document.getElementById("startlink").setAttribute("class","disabled dropdown-item")
+                document.getElementById("stoplink").setAttribute("class","disabled dropdown-item")
+                document.getElementById("terminatelink").setAttribute("class","disabled dropdown-item")
                 var instanceid = x;
                 var current_url = window.location.href;
                 var iid = current_url.split("/")[4].split("#")[0];
@@ -166,28 +185,14 @@
                 });
             }
         </script>
-        <!-- <script>
-            function rebootec2(x){
-                var instanceid = x;
-                var current_url = window.location.href;
-                var iid = current_url.split("/")[4].split("#")[0];
-                var idinstance = instanceid+"_"+iid
-
-                req = $.ajax({
-                    url : '/rebootec2/'+idinstance,
-                    type : 'POST'
-                });
-                req.done(function(data){
-                    if (data.result == "fail"){
-                        alert("Error Code 80 : Rebooting EC2 Instance  "+instanceid);
-                    } else {
-                        location.reload();
-                    }
-                });
-            }
-        </script> -->
+       
         <script>
             function terminatec2(x){
+                document.getElementById("statuscell").style.display = "none";
+                document.getElementById("spinner").style.display = "block";
+                document.getElementById("startlink").setAttribute("class","disabled dropdown-item")
+                document.getElementById("stoplink").setAttribute("class","disabled dropdown-item")
+                document.getElementById("terminatelink").setAttribute("class","disabled dropdown-item")
 
                 var instanceid = x;
                 var current_url = window.location.href;
