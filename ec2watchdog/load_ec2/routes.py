@@ -6,12 +6,13 @@ from ec2watchdog.load_ec2.forms import Ec2SshForm,Ec2FilterForm
 import datetime
 import boto3
 import botocore
-from boto3 import resources
+from boto3 import client, resources
 import datetime
 from dateutil.tz import tzutc
 import base64
 import webbrowser
 import time
+import paramiko
 
 #Blueprint object
 blue = Blueprint('load_ec2',__name__,template_folder='templates')
@@ -116,35 +117,6 @@ def stopec2(idinstance):
             time.sleep(5)
         return jsonify({'result':'pass'})
 
-# Reboot ec2 instance
-# @blue.route('/rebootec2/<string:idinstance>',methods=['GET','POST'])
-# def rebootec2(idinstance):
-#     # Get instance info
-#     instance_id = idinstance.split('_')[0]
-#     row_id = idinstance.split('_')[1].split(':')[0]
-#     region = idinstance.split('_')[1].split(':')[1]
-
-#     #get access info
-#     get_access_info = AccessKey.query.get(row_id)
-
-#     #get accesskey and secretkey
-#     accesskey = get_access_info.accesskeyid
-#     secretkey = get_access_info.secretkeyid
-
-#     # check the status of instance
-#     client = boto3.client('ec2',region_name=region,aws_access_key_id=accesskey,aws_secret_access_key=secretkey)
-#     response = client.describe_instances(InstanceIds=[instance_id])
-#     status = ['terminated','pending','stopping','shutting-down']
-#     print(response)
-#     if response['Reservations'][0]['Instances'][0]['State']['Name'] in status:
-#         return jsonify({'result':'fail'})
-#     else:
-#         print ("REBOOTING ...SS")
-#         ec2_restart_response = client.reboot_instances(InstanceIds=[instance_id])
-#         print(ec2_restart_response)
-#         return jsonify({'result':'pass'})
-
-
 #Terminate ec2 instance
 @blue.route('/terminatec2/<string:idinstance>',methods=['GET','POST'])
 def terminatec2(idinstance):
@@ -211,7 +183,7 @@ def viewinfo(idinstance):
     #volume
     volume = client.describe_volumes(Filters=[{'Name':'attachment.instance-id','Values':[instance_id]}])
     volume_data = volume['Volumes']
-   
+        
     return render_template('load_ec2/viewinfo.html',title="EC2 View Info",awsregion=awsregion,row=row,instance_id=instance_id,instance_data=instance_data,ami_info=ami_info,
     sg_data=sg_data,volume_data=volume_data)
 

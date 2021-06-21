@@ -1,15 +1,17 @@
 from flask_wtf import FlaskForm
 from wtforms import SelectField, SubmitField, PasswordField
-from wtforms.fields.core import StringField,SelectField
+from wtforms import validators
+from wtforms import StringField,SelectField,TextAreaField
 from wtforms.validators import DataRequired,ValidationError,IPAddress
 
 #EC2 SSH form
 class Ec2SshForm(FlaskForm):
-	hostname = StringField('hostname',validators=[DataRequired(),IPAddress(ipv4=True,message="Please enter valid public ipv4 address")])
+	hostname = StringField('hostname',render_kw={'readonly': True},validators=[DataRequired(),IPAddress(ipv4=True,message="Please enter valid public ipv4 address")])
 	username = StringField('username',validators=[DataRequired()])
 	password = PasswordField('password',validators=[DataRequired()])
 	title = StringField('title',validators=[DataRequired()])
 	submit = SubmitField('Connect')
+
 
 #EC2 Region
 class Ec2FilterForm(FlaskForm):
