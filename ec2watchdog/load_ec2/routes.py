@@ -12,7 +12,6 @@ from dateutil.tz import tzutc
 import base64
 import webbrowser
 import time
-import paramiko
 
 #Blueprint object
 blue = Blueprint('load_ec2',__name__,template_folder='templates')
@@ -20,6 +19,7 @@ blue = Blueprint('load_ec2',__name__,template_folder='templates')
 #Load EC2
 @blue.route('/loadec2/<string:rowinfo>',methods=['GET','POST'])
 def loadec2(rowinfo):
+    instance_id_list = []
     rowid = rowinfo.split(":")[0]
     region = rowinfo.split(":")[1]
 
@@ -36,10 +36,14 @@ def loadec2(rowinfo):
         instance_load = client.describe_instances()
         instance_load_length = len(instance_load['Reservations'])
         instance_data = instance_load['Reservations']
+        #print(instance_data)
+        for i in instance_data:
+            instance_id_list.append(i['Instances'][0]['InstanceId'])
+        
     except botocore.exceptions.ClientError:
         flash(f'Access Denied to {region}','danger')
         return redirect(url_for('load_ec2.ec2',rowid=rowid))
-    return render_template('load_ec2/load_ec2.html',title="Load EC2",instance_data=instance_data,instance_load_length=instance_load_length,row=rowid,awsregion=region)
+    return render_template('load_ec2/load_ec2.html',title="Load EC2",instance_data=instance_data,instance_load_length=instance_load_length,row=rowid,awsregion=region,instance_id_list=instance_id_list)
 
 #Filter EC2
 @blue.route('/ec2/<int:rowid>',methods=['POST','GET'])

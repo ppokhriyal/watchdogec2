@@ -52,11 +52,12 @@
                             <td>NA</td>
                         {% endif %}
                         <td>
-                            <p id="spinner">
-                                <span class="spinner-grow spinner-grow-sm text-info text-center" role="status" aria-hidden="true" ></span>
-                                Pending
-                            </p>   
-                            <p class="text-center" id="statuscell">
+                            <div class="d-flex justify-content-center">
+                                <div class="spinner-grow spinner-grow-sm text-info" role="status" id="{{i['Instances'][0]['InstanceId']}}">
+                                  <span class="visually-hidden">Loading...</span>
+                                </div>
+                            </div>
+                            <p class="text-center" id="stat_{{i['Instances'][0]['InstanceId']}}">
                                 {% if i['Instances'][0]['State']['Name'] == "running" %}
                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-circle-fill text-success me-1" viewBox="0 0 16 16">
                                         <circle cx="8" cy="8" r="8"/>
@@ -103,9 +104,9 @@
                                             Instance State
                                         </button>
                                         <ul class="dropdown-menu" aria-labelledby="btnGroupDrop1">
-                                            <li><a id="startlink" class="dropdown-item " href="#" onclick="startec2('{{i['Instances'][0]['InstanceId']}}')">Start</a></li>
+                                            <li><a id="startlink" class="dropdown-item " href="#" onclick="startec2('{{i['Instances'][0]['InstanceId']}}','stat_{{i['Instances'][0]['InstanceId']}}')">Start</a></li>
                                             <li><a id="stoplink" class="dropdown-item disabled" href="#" onclick="stopec2('{{i['Instances'][0]['InstanceId']}}')">Stop</a></li>
-                                            <li><a id="terminatelink" class="dropdown-item" href="#" onclick="terminatec2('{{i['Instances'][0]['InstanceId']}}')">Terminate</a></li>
+                                            <li><a id="terminatelink" class="dropdown-item" href="#" onclick="terminatec2('{{i['Instances'][0]['InstanceId']}}','stat_{{i['Instances'][0]['InstanceId']}}')">Terminate</a></li>
                                         </ul>
                                     </div>
                                     <a class="btn btn-primary disabled" href="{{url_for('load_ec2.sshec2',idinstance=i['Instances'][0]['InstanceId']+':'+awsregion+':'+row)}}" role="button" data-bs-toggle="tooltip" data-bs-placement="right" title="SSH EC2 instance">Cloud Shell</a>
@@ -119,8 +120,8 @@
                                         </button>
                                         <ul class="dropdown-menu" aria-labelledby="btnGroupDrop1">
                                             <li><a id="startlink" class="dropdown-item disabled" href="#" onclick="startec2('{{i['Instances'][0]['InstanceId']}}')">Start</a></li>
-                                            <li><a id="stoplink" class="dropdown-item" href="#" onclick="stopec2('{{i['Instances'][0]['InstanceId']}}')">Stop</a></li>
-                                            <li><a id="terminatelink" class="dropdown-item" href="#" onclick="terminatec2('{{i['Instances'][0]['InstanceId']}}')">Terminate</a></li>
+                                            <li><a id="stoplink" class="dropdown-item" href="#" onclick="stopec2('{{i['Instances'][0]['InstanceId']}}','stat_{{i['Instances'][0]['InstanceId']}}')">Stop</a></li>
+                                            <li><a id="terminatelink" class="dropdown-item" href="#" onclick="terminatec2('{{i['Instances'][0]['InstanceId']}}','stat_{{i['Instances'][0]['InstanceId']}}')">Terminate</a></li>
                                         </ul>
                                     </div>
                                     <a class="btn btn-primary" href="{{url_for('load_ec2.sshec2',idinstance=i['Instances'][0]['InstanceId']+':'+awsregion+':'+row)}}" role="button" data-bs-toggle="tooltip" data-bs-placement="right" title="SSH EC2 instance">Cloud Shell</a>
@@ -146,10 +147,16 @@
                 {% endfor %}
             </tbody>
         </table>
-        <script>
-            document.getElementById("spinner").style.display = "none";
-        </script>
-        <script>
+       <script>
+           //var dividlist = ['i-06abf0eca6872e776','i-06cbe0d9d7b3c149b'];
+           var dividlist = {{instance_id_list | tojson}};
+           for (i=0;i<dividlist.length;i++){
+                divId = dividlist[i];
+                document.getElementById(divId).style.display = "none";
+           }
+          
+       </script>
+        <script>    
             document.getElementById("loadsync").style.display = "none";
         </script>
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
@@ -173,9 +180,9 @@
         </script>
        
         <script>
-            function startec2(x){
-                document.getElementById("statuscell").style.display = "none";
-                document.getElementById("spinner").style.display = "block";
+            function startec2(x,y){
+                document.getElementById(x).style.display = "block";
+                document.getElementById(y).style.display = "none";
                 document.getElementById("startlink").setAttribute("class","disabled dropdown-item")
                 document.getElementById("stoplink").setAttribute("class","disabled dropdown-item")
                 document.getElementById("terminatelink").setAttribute("class","disabled dropdown-item")
@@ -199,9 +206,9 @@
             }
         </script>
         <script>
-            function stopec2(x){
-                document.getElementById("statuscell").style.display = "none";
-                document.getElementById("spinner").style.display = "block";
+            function stopec2(x,y){
+                document.getElementById(x).style.display = "block";
+                document.getElementById(y).style.display = "none";
                 document.getElementById("startlink").setAttribute("class","disabled dropdown-item")
                 document.getElementById("stoplink").setAttribute("class","disabled dropdown-item")
                 document.getElementById("terminatelink").setAttribute("class","disabled dropdown-item")
@@ -225,9 +232,9 @@
         </script>
        
         <script>
-            function terminatec2(x){
-                document.getElementById("statuscell").style.display = "none";
-                document.getElementById("spinner").style.display = "block";
+            function terminatec2(x,y){
+                document.getElementById(y).style.display = "none";
+                document.getElementById(x).style.display = "block";
                 document.getElementById("startlink").setAttribute("class","disabled dropdown-item")
                 document.getElementById("stoplink").setAttribute("class","disabled dropdown-item")
                 document.getElementById("terminatelink").setAttribute("class","disabled dropdown-item")
