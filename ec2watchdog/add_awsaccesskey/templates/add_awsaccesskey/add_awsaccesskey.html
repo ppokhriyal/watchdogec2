@@ -22,7 +22,21 @@
                     <label for="formGroupExampleInput2" class="form-label">Secret Key</label>
                     {{form.secret_keyid(class="form-control")}}
                 </div>
-                {{form.submit(class="btn btn-primary")}}
+                {{form.submit(class="btn btn-primary",onclick="addkey()",id="add")}}
+                <button class="btn btn-primary" type="button" disabled id="loadkey">
+                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                    Adding Key...
+                </button>
             </form>
         </div>
+    </div>
+    <script>
+        document.getElementById("loadkey").style.display = "none";
+    </script>
+    <script>
+        function addkey(){
+            document.getElementById("add").style.display = "none";
+            document.getElementById("loadkey").style.display = "block";
+        }
+    </script>
 {% endblock content %}

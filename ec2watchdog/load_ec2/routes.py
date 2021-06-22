@@ -32,10 +32,13 @@ def loadec2(rowinfo):
     
     # connect to boto3 ec2
     client = boto3.client('ec2',region_name=region,aws_access_key_id=accesskey,aws_secret_access_key=secretkey)
-    instance_load = client.describe_instances()
-    instance_load_length = len(instance_load['Reservations'])
-    instance_data = instance_load['Reservations']
-
+    try:
+        instance_load = client.describe_instances()
+        instance_load_length = len(instance_load['Reservations'])
+        instance_data = instance_load['Reservations']
+    except botocore.exceptions.ClientError:
+        flash(f'Access Denied to {region}','danger')
+        return redirect(url_for('load_ec2.ec2',rowid=rowid))
     return render_template('load_ec2/load_ec2.html',title="Load EC2",instance_data=instance_data,instance_load_length=instance_load_length,row=rowid,awsregion=region)
 
 #Filter EC2
