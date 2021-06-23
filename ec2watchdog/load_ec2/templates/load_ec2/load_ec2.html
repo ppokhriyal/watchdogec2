@@ -40,17 +40,21 @@
                 {% for i in instance_data %}
                     <tr>
                         <td>{{i['Instances'][0]['InstanceId']}}</td>
+
                         {% if "Tags" in i['Instances'][0].keys() %}
                             <td>{{i['Instances'][0]['Tags'][0]['Value']}}</td>
                         {% else %}
                             <td>NA</td>    
                         {% endif %}
+
                         <td>{{i['Instances'][0]['InstanceType']}}</td>
+
                         {% if "PublicIpAddress" in i['Instances'][0].keys() %}
-                            <td>{{i['Instances'][0]['PublicIpAddress']}}
+                            <td>{{i['Instances'][0]['PublicIpAddress']}}</td>
                         {% else %}
                             <td>NA</td>
                         {% endif %}
+
                         <td>
                             <div class="d-flex justify-content-center">
                                 <div class="spinner-grow spinner-grow-sm text-info" role="status" id="{{i['Instances'][0]['InstanceId']}}">
@@ -59,7 +63,7 @@
                             </div>
                             <p class="text-center" id="stat_{{i['Instances'][0]['InstanceId']}}">
                                 {% if i['Instances'][0]['State']['Name'] == "running" %}
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-circle-fill text-success me-1" viewBox="0 0 16 16">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-circle-fill text-success me-2" viewBox="0 0 16 16">
                                         <circle cx="8" cy="8" r="8"/>
                                     </svg>
                                     {{i['Instances'][0]['State']['Name'].capitalize()}}
@@ -68,11 +72,12 @@
                                         <circle cx="8" cy="8" r="8"/>
                                     </svg>
                                     {{i['Instances'][0]['State']['Name'].capitalize()}}
-                                {% elif i['Instances'][0]['State']['Name'] == "terminated" %}
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-circle-fill text-danger me-1" viewBox="0 0 16 16">
+                                {% elif i['Instances'][0]['State']['Name'] == "terminated" %}  
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-circle-fill text-danger" viewBox="0 0 16 16">
                                         <circle cx="8" cy="8" r="8"/>
                                     </svg>
                                     {{i['Instances'][0]['State']['Name'].capitalize()}}
+                                    
                                 {% else %}
                                     <span class="spinner-grow spinner-grow-sm text-info text-center" role="status" aria-hidden="true" ></span>
                                     Pending
@@ -104,9 +109,9 @@
                                             Instance State
                                         </button>
                                         <ul class="dropdown-menu" aria-labelledby="btnGroupDrop1">
-                                            <li><a id="startlink" class="dropdown-item " href="#" onclick="startec2('{{i['Instances'][0]['InstanceId']}}','stat_{{i['Instances'][0]['InstanceId']}}')">Start</a></li>
-                                            <li><a id="stoplink" class="dropdown-item disabled" href="#" onclick="stopec2('{{i['Instances'][0]['InstanceId']}}')">Stop</a></li>
-                                            <li><a id="terminatelink" class="dropdown-item" href="#" onclick="terminatec2('{{i['Instances'][0]['InstanceId']}}','stat_{{i['Instances'][0]['InstanceId']}}')">Terminate</a></li>
+                                            <li><a id="start_{{i['Instances'][0]['InstanceId']}}" class="dropdown-item " href="#" onclick="startec2('{{i['Instances'][0]['InstanceId']}}','stat_{{i['Instances'][0]['InstanceId']}}','start_{{i['Instances'][0]['InstanceId']}}','stop_{{i['Instances'][0]['InstanceId']}}','terminate_{{i['Instances'][0]['InstanceId']}}')">Start</a></li>
+                                            <li><a id="stop_{{i['Instances'][0]['InstanceId']}}" class="dropdown-item disabled" href="#" onclick="stopec2('{{i['Instances'][0]['InstanceId']}}','start_{{i['Instances'][0]['InstanceId']}}','stop_{{i['Instances'][0]['InstanceId']}}','terminate_{{i['Instances'][0]['InstanceId']}}')">Stop</a></li>
+                                            <li><a id="terminate_{{i['Instances'][0]['InstanceId']}}" class="dropdown-item" href="#" onclick="terminatec2('{{i['Instances'][0]['InstanceId']}}','stat_{{i['Instances'][0]['InstanceId']}}','start_{{i['Instances'][0]['InstanceId']}}','stop_{{i['Instances'][0]['InstanceId']}}','terminate_{{i['Instances'][0]['InstanceId']}}')">Terminate</a></li>
                                         </ul>
                                     </div>
                                     <a class="btn btn-primary disabled" href="{{url_for('load_ec2.sshec2',idinstance=i['Instances'][0]['InstanceId']+':'+awsregion+':'+row)}}" role="button" data-bs-toggle="tooltip" data-bs-placement="right" title="SSH EC2 instance">Cloud Shell</a>
@@ -119,9 +124,9 @@
                                             Instance State
                                         </button>
                                         <ul class="dropdown-menu" aria-labelledby="btnGroupDrop1">
-                                            <li><a id="startlink" class="dropdown-item disabled" href="#" onclick="startec2('{{i['Instances'][0]['InstanceId']}}')">Start</a></li>
-                                            <li><a id="stoplink" class="dropdown-item" href="#" onclick="stopec2('{{i['Instances'][0]['InstanceId']}}','stat_{{i['Instances'][0]['InstanceId']}}')">Stop</a></li>
-                                            <li><a id="terminatelink" class="dropdown-item" href="#" onclick="terminatec2('{{i['Instances'][0]['InstanceId']}}','stat_{{i['Instances'][0]['InstanceId']}}')">Terminate</a></li>
+                                            <li><a id="start_{{i['Instances'][0]['InstanceId']}}" class="dropdown-item disabled" href="#" onclick="startec2('{{i['Instances'][0]['InstanceId']}}','start_{{i['Instances'][0]['InstanceId']}}','stop_{{i['Instances'][0]['InstanceId']}}','terminate_{{i['Instances'][0]['InstanceId']}}')">Start</a></li>
+                                            <li><a id="stop_{{i['Instances'][0]['InstanceId']}}" class="dropdown-item" href="#" onclick="stopec2('{{i['Instances'][0]['InstanceId']}}','stat_{{i['Instances'][0]['InstanceId']}}','start_{{i['Instances'][0]['InstanceId']}}','stop_{{i['Instances'][0]['InstanceId']}}','terminate_{{i['Instances'][0]['InstanceId']}}')">Stop</a></li>
+                                            <li><a id="terminate_{{i['Instances'][0]['InstanceId']}}" class="dropdown-item" href="#" onclick="terminatec2('{{i['Instances'][0]['InstanceId']}}','stat_{{i['Instances'][0]['InstanceId']}}','start_{{i['Instances'][0]['InstanceId']}}','stop_{{i['Instances'][0]['InstanceId']}}','terminate_{{i['Instances'][0]['InstanceId']}}')">Terminate</a></li>
                                         </ul>
                                     </div>
                                     <a class="btn btn-primary" href="{{url_for('load_ec2.sshec2',idinstance=i['Instances'][0]['InstanceId']+':'+awsregion+':'+row)}}" role="button" data-bs-toggle="tooltip" data-bs-placement="right" title="SSH EC2 instance">Cloud Shell</a>
@@ -134,9 +139,9 @@
                                             Instance State
                                         </button>
                                         <ul class="dropdown-menu" aria-labelledby="btnGroupDrop1">
-                                            <li><a id="startlink" class="dropdown-item " href="#" onclick="startec2('{{i['Instances'][0]['InstanceId']}}')">Start</a></li>
-                                            <li><a id="stoplink" class="dropdown-item" href="#" onclick="stopec2('{{i['Instances'][0]['InstanceId']}}')">Stop</a></li>
-                                            <li><a id="terminatelink" class="dropdown-item" href="#" onclick="terminatec2('{{i['Instances'][0]['InstanceId']}}')">Terminate</a></li>
+                                            <li><a id="start_{{i['Instances'][0]['InstanceId']}}" class="dropdown-item " href="#" onclick="startec2('{{i['Instances'][0]['InstanceId']}}','start_{{i['Instances'][0]['InstanceId']}}','stop_{{i['Instances'][0]['InstanceId']}}','terminate_{{i['Instances'][0]['InstanceId']}}')">Start</a></li>
+                                            <li><a id="stop_{{i['Instances'][0]['InstanceId']}}" class="dropdown-item" href="#" onclick="stopec2('{{i['Instances'][0]['InstanceId']}}','start_{{i['Instances'][0]['InstanceId']}}','stop_{{i['Instances'][0]['InstanceId']}}','terminate_{{i['Instances'][0]['InstanceId']}}')">Stop</a></li>
+                                            <li><a id="terminate_{{i['Instances'][0]['InstanceId']}}" class="dropdown-item" href="#" onclick="terminatec2('{{i['Instances'][0]['InstanceId']}}','start_{{i['Instances'][0]['InstanceId']}}','stop_{{i['Instances'][0]['InstanceId']}}','terminate_{{i['Instances'][0]['InstanceId']}}')">Terminate</a></li>
                                         </ul>
                                     </div>
                                     <a class="btn btn-primary" href="{{url_for('load_ec2.sshec2',idinstance=i['Instances'][0]['InstanceId']+':'+awsregion+':'+row)}}" role="button" data-bs-toggle="tooltip" data-bs-placement="right" title="SSH EC2 instance">Cloud Shell</a>
@@ -180,12 +185,12 @@
         </script>
        
         <script>
-            function startec2(x,y){
+            function startec2(x,y,a,b,c){
                 document.getElementById(x).style.display = "block";
                 document.getElementById(y).style.display = "none";
-                document.getElementById("startlink").setAttribute("class","disabled dropdown-item")
-                document.getElementById("stoplink").setAttribute("class","disabled dropdown-item")
-                document.getElementById("terminatelink").setAttribute("class","disabled dropdown-item")
+                document.getElementById(a).setAttribute("class","disabled dropdown-item");
+                document.getElementById(b).setAttribute("class","disabled dropdown-item");
+                document.getElementById(c).setAttribute("class","disabled dropdown-item");
 
                 var instanceid = x;
                 var current_url = window.location.href;
@@ -206,12 +211,12 @@
             }
         </script>
         <script>
-            function stopec2(x,y){
+            function stopec2(x,y,a,b,c){
                 document.getElementById(x).style.display = "block";
                 document.getElementById(y).style.display = "none";
-                document.getElementById("startlink").setAttribute("class","disabled dropdown-item")
-                document.getElementById("stoplink").setAttribute("class","disabled dropdown-item")
-                document.getElementById("terminatelink").setAttribute("class","disabled dropdown-item")
+                document.getElementById(a).setAttribute("class","disabled dropdown-item");
+                document.getElementById(b).setAttribute("class","disabled dropdown-item");
+                document.getElementById(c).setAttribute("class","disabled dropdown-item");
                 var instanceid = x;
                 var current_url = window.location.href;
                 var iid = current_url.split("/")[4].split("#")[0];
@@ -232,12 +237,12 @@
         </script>
        
         <script>
-            function terminatec2(x,y){
+            function terminatec2(x,y,a,b,c){
                 document.getElementById(y).style.display = "none";
                 document.getElementById(x).style.display = "block";
-                document.getElementById("startlink").setAttribute("class","disabled dropdown-item")
-                document.getElementById("stoplink").setAttribute("class","disabled dropdown-item")
-                document.getElementById("terminatelink").setAttribute("class","disabled dropdown-item")
+                document.getElementById(a).setAttribute("class","disabled dropdown-item");
+                document.getElementById(b).setAttribute("class","disabled dropdown-item");
+                document.getElementById(c).setAttribute("class","disabled dropdown-item");
 
                 var instanceid = x;
                 var current_url = window.location.href;
