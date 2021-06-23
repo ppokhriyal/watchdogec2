@@ -144,7 +144,7 @@ def terminatec2(idinstance):
     response = client.describe_instances(InstanceIds=[instance_id])
     #terminate status
     status = ['terminated','pending']
-    print(response)
+
     if response['Reservations'][0]['Instances'][0]['State']['Name'] in status:
         return jsonify({'result':'fail'})
     else:
@@ -221,4 +221,5 @@ def sshec2(idinstance):
         #web ssh
         ssh_url = "http://localhost:8889/?hostname="+form.hostname.data+"&username="+form.username.data+"&password="+base64_password+"&title="+form.title.data
         webbrowser.open_new_tab(ssh_url)
+        
     return render_template('load_ec2/sshec2.html',title='SSH EC2',awsregion=awsregion,row=row,instance_id=instance_id,form=form,publicip=publicip)
